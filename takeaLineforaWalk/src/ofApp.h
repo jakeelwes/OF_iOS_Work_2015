@@ -23,7 +23,7 @@ public:
     
     
     ofPoint location, velocity, acceleration, desired;
-    float speed, maxSpeed, maxForce;
+    float speed, speed2, maxSpeed, maxForce;
 
     
 //    float px, py;

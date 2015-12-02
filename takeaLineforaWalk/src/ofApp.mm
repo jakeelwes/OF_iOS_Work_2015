@@ -69,15 +69,17 @@ void ofApp::update() {
 void ofApp::draw() {
     
   if(!pause) {
+
+
     fbo.begin();
       
+      if(noBG && ofGetFrameNum()>10){
+          ofSetColor(averagedCol);
+          ofDrawRectangle(0,0, ofGetWidth()*2, ofGetHeight()*2);
+          noBG = false;
+      }
       ofSetBackgroundAuto(false);
-    
-    if(noBG && ofGetFrameNum()>10){
-        ofSetColor(averagedCol);
-        ofDrawRectangle(0,0, ofGetWidth()*2, ofGetHeight()*2);
-        noBG = false;
-    }
+
     
 //    ofSetBackgroundAuto( false );
     
@@ -95,23 +97,27 @@ void ofApp::draw() {
                      + velocity.y*velocity.y
                      + 20*accel.x * 20*accel.x
                      + 20*accel.y * 20*accel.y),
-                  0, 10);
+                  0, 35);
+      
 
     if(ofGetFrameNum()>10){
         ofSetColor(ofColor(averagedCol, 255));
-        ofDrawCircle(location, (25-speed*2)*4);
+        ofDrawCircle(location, ofClamp((20-speed*1.3), 1, 20)*4);
         
-        ofSetColor(ofColor(averagedCol, 15-speed));
-        ofDrawCircle(location, (10+speed*6)*4);
+        ofSetColor(ofColor(averagedCol, ofClamp((2+speed/2),0,15)));
+        ofDrawCircle(location, (10+speed*2)*4);
         
-        ofSetColor(ofColor(averagedCol, 1+speed/2));
-        ofDrawCircle(location, (500-speed*100)*4);
+        ofSetColor(ofColor(averagedCol, ofMap(speed/3, 0, 35, 0, 15)));
+        ofDrawCircle(location, (400-speed*10)*4);
     }
+      
+      cout<<speed<<endl;
     
 
 
         fbo.end();
-    
+      
+      ofSetColor(255,255,255);
         fbo.draw(0,0, ofGetWidth(), ofGetHeight());
   }
     
@@ -202,7 +208,10 @@ void ofApp::touchDoubleTap(ofTouchEventArgs & touch){
 
 void ofApp::saveImg(){
     ofPixels pixels;
+//    pixels.setNumChannels(3);
     fbo.readToPixels(pixels);
+    
+    cout<<pixels.getNumChannels()<<endl;
     
     ofSaveImage(pixels, ofxiOSGetDocumentsDirectory() + keyboard->getText()+ofGetTimestampString(" %d:%m:%y %H.%M.%S") + ".png");
     
