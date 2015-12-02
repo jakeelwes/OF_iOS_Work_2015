@@ -37,5 +37,12 @@ public:
     float t;
     ofFloatColor averagedCol;
     ofVideoGrabber vidGrabber;
+        
+    ofPoint accel;
+    ofImage img;
+    bool save = false;
+    
+    ofxiOSAppDelegate * delegate;
+
 
 };
