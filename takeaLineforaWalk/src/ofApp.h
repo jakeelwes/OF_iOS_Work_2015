@@ -18,23 +18,13 @@ public:
     void applyForce(ofPoint force);
     void seek(ofPoint target);
     
+    void touchDoubleTap(ofTouchEventArgs & touch);
+    void saveImg();
+    
+    
     ofPoint location, velocity, acceleration, desired;
     float speed, maxSpeed, maxForce;
-    
-    
-    void touchDown(ofTouchEventArgs & touch);
-    void touchMoved(ofTouchEventArgs & touch);
-    void touchUp(ofTouchEventArgs & touch);
-    void touchDoubleTap(ofTouchEventArgs & touch);
-        
-    void touchCancelled(ofTouchEventArgs & touch);
-    
-    void lostFocus();
-    void gotFocus();
-    void gotMemoryWarning();
-    void deviceOrientationChanged(int newOrientation);
-    
-    void gotMessage(ofMessage msg);
+
     
 //    float px, py;
     
@@ -44,12 +34,15 @@ public:
         
     ofPoint accel;
     
-    bool save = false;
+//    bool save = false;
     bool noBG = true;
+    bool pause = false;
+    bool dtap = false;
     
     ofFbo fbo;
 //    unsigned char* pixels;
 //    ofImage imgSaver;
     
     ofxiOSKeyboard * keyboard;
+    ofTrueTypeFont font;
 };

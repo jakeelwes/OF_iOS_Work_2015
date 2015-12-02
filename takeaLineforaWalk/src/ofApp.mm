@@ -10,10 +10,12 @@ void ofApp::setup(){
     ofxAccelerometer.setup();
     ofEnableAlphaBlending();
     
+    font.load("Avenir Book.otf", 26);
+    
     
     acceleration = ofPoint(0,0);
     velocity = ofPoint(0,0);
-    location = ofPoint(ofGetWidth()/2, ofGetHeight()/2);
+    location = ofPoint(ofGetWidth(), ofGetHeight());
 
     maxSpeed = 4;
     maxForce = 1;
@@ -61,13 +63,15 @@ void ofApp::update() {
     if(location.y <= 0-way){
         location.y = 0-way;
     }
-    
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-
+    
+  if(!pause) {
     fbo.begin();
+      
+      ofSetBackgroundAuto(false);
     
     if(noBG && ofGetFrameNum()>10){
         ofSetColor(averagedCol);
@@ -93,21 +97,45 @@ void ofApp::draw() {
                      + 20*accel.y * 20*accel.y),
                   0, 10);
 
+    if(ofGetFrameNum()>10){
+        ofSetColor(ofColor(averagedCol, 255));
+        ofDrawCircle(location, (25-speed*2)*4);
+        
+        ofSetColor(ofColor(averagedCol, 15-speed));
+        ofDrawCircle(location, (10+speed*6)*4);
+        
+        ofSetColor(ofColor(averagedCol, 1+speed/2));
+        ofDrawCircle(location, (500-speed*100)*4);
+    }
     
-    ofSetColor(ofColor(averagedCol, 255));
-    ofDrawCircle(location, (25-speed*2)*4);
-    
-//    ofSetColor(ofColor(averagedCol, 15-speed));
-//    ofDrawCircle(location, (10+speed*6)*4);
-//    
-//    ofSetColor(ofColor(averagedCol, 1+speed/2));
-//    ofDrawCircle(location, (500-speed*100)*4);
 
-    fbo.end();
-    
-    fbo.draw(0,0, ofGetWidth(), ofGetHeight());
 
+        fbo.end();
     
+        fbo.draw(0,0, ofGetWidth(), ofGetHeight());
+  }
+    
+    if(dtap && ofGetMousePressed() && ofGetMouseY() > 300 && ofGetMouseY() < 600){
+        
+        if(ofGetMouseY() < 450){
+            if(ofGetMouseX()<ofGetWidth()/2){
+                pause = false;
+                keyboard->setVisible(false);
+                fbo.draw(0,0, ofGetWidth(), ofGetHeight());
+            } else {
+                pause = false;
+                keyboard->setVisible(false);
+                noBG = true;
+            }
+        } else {
+            saveImg();
+            pause = false;
+            keyboard->setVisible(false);
+            noBG = true;
+        }
+        
+
+    }
 }
 
 //--------------------------------------------------------------
@@ -138,81 +166,48 @@ void ofApp::seek(ofPoint target){ //seek steering force algorithm
     applyForce(steer);
 }
 
-
-//--------------------------------------------------------------
-void ofApp::touchDown(ofTouchEventArgs & touch){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::touchMoved(ofTouchEventArgs & touch){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::touchUp(ofTouchEventArgs & touch){
-
-}
-
 //--------------------------------------------------------------
 void ofApp::touchDoubleTap(ofTouchEventArgs & touch){
     
-//    keyboard = new ofxiOSKeyboard(2,40,320,32);
-//    keyboard->setVisible(false);
-//    keyboard->setBgColor(255, 255, 255, 255);
-//    keyboard->setFontColor(0,0,0, 255);
-//    keyboard->setFontSize(26);
-//    
-//    ofSetColor(0, 255);
-//    ofSetColor(20, 160, 240, 255);
-//    ofDrawBitmapString("Name: "+  keyboard->getText() , 2, 100);
-//    keyboard->setVisible(true);
+    dtap = true;
+    
+    pause = true;
+    
+    keyboard = new ofxiOSKeyboard(2,40,320,32);
+    keyboard->setVisible(true);
+    keyboard->openKeyboard();
+    keyboard->setBgColor(255, 255, 255, 150);
+    keyboard->setFontColor(50,50,50, 255);
+    keyboard->setFontSize(26);
+    
+    ofSetColor(0, 60);
+    ofDrawRectangle(0, 0, ofGetWidth(), 60);
+
+    ofSetColor(255, 255);
+    font.drawString("Title of image to save", 2, 45);
+    
+    ofSetColor(0, 60);
+    ofDrawRectangle(0, 340, ofGetWidth(), 180);
+    ofSetColor(255, 255);
+    font.drawString("Save", 50, 500);
+    font.drawString("Clear", ofGetWidth()-180, 380);
+    font.drawString("Continue", 50, 380);
 
     
 //    save = true;
     
+//    cout<<keyboard->isKeyboardShowing()<<endl;
+    
+}
+
+void ofApp::saveImg(){
     ofPixels pixels;
     fbo.readToPixels(pixels);
     
-    ofSaveImage(pixels, ofxiOSGetDocumentsDirectory() + "image"+ofGetTimestampString(" %d:%m:%y %H.%M.%S") + ".png");
+    ofSaveImage(pixels, ofxiOSGetDocumentsDirectory() + keyboard->getText()+ofGetTimestampString(" %d:%m:%y %H.%M.%S") + ".png");
     
-    fbo.clear();
-    
-    fbo.begin();
-
-    ofSetColor(averagedCol);
-    ofDrawRectangle(0,0, ofGetWidth()*2, ofGetHeight()*2);
-    
-    fbo.end();
-    
+//    save = false;
+    dtap = false;
 }
 
-//--------------------------------------------------------------
-void ofApp::touchCancelled(ofTouchEventArgs & touch){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::lostFocus(){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::gotFocus(){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMemoryWarning(){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::deviceOrientationChanged(int newOrientation){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-}
 
