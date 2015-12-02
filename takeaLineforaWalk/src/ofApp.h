@@ -1,6 +1,10 @@
 #pragma once
 
 #include "ofxiOS.h"
+#include "ofxiOSKeyboard.h"
+#include <time.h>
+
+
 
 class ofApp : public ofxiOSApp{
     
@@ -39,10 +43,13 @@ public:
     ofVideoGrabber vidGrabber;
         
     ofPoint accel;
-    ofImage img;
-    bool save = false;
     
-    ofxiOSAppDelegate * delegate;
-
-
+    bool save = false;
+    bool noBG = true;
+    
+    ofFbo fbo;
+//    unsigned char* pixels;
+//    ofImage imgSaver;
+    
+    ofxiOSKeyboard * keyboard;
 };

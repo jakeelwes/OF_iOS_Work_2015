@@ -4,10 +4,11 @@
 void ofApp::setup(){
     ofBackground(averagedCol);
     ofSetCircleResolution(80);
-    ofSetLogLevel(OF_LOG_VERBOSE);
+//    ofSetLogLevel(OF_LOG_VERBOSE);
     
     // initialize the accelerometer
     ofxAccelerometer.setup();
+    ofEnableAlphaBlending();
     
     
     acceleration = ofPoint(0,0);
@@ -18,11 +19,18 @@ void ofApp::setup(){
     maxForce = 1;
     
     vidGrabber.setup(480, 360);
-    vidGrabber.setVerbose(true);
+//    vidGrabber.setVerbose(true);
     
-     delegate = ofxiOSGetAppDelegate();
-
+    int width = ofGetWidth();
+    int height = ofGetHeight();
     
+    fbo.allocate(width*2, height*2);
+//    fbo.clear(0, 0, 0, 1);
+    
+//    pixels = new unsigned char[width*height*3];
+    
+//    imgSaver.allocate(width*2, height*2, OF_IMAGE_COLOR);
+//    imgSaver.setUseTexture(false);
 
 }
 
@@ -41,14 +49,14 @@ void ofApp::update() {
     float way = 30;
     
 //    collision
-    if(location.x >= ofGetWidth()+way){
-        location.x = ofGetWidth()+way;
+    if(location.x >= ofGetWidth()*2+way){
+        location.x = ofGetWidth()*2+way;
     }
     if(location.x <= 0-way){
         location.x = 0-way;
     }
-    if(location.y >= ofGetHeight()+way){
-        location.y = ofGetHeight()+way;
+    if(location.y >= ofGetHeight()*2+way){
+        location.y = ofGetHeight()*2+way;
     }
     if(location.y <= 0-way){
         location.y = 0-way;
@@ -58,27 +66,24 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    
-//    t += 0.05;
-//    float mapR = ofMap(ofNoise(t),1,0,0,255);
-//    float mapB = ofMap(ofNoise(t+1000),1,0,0,100);
 
-    ofSetBackgroundAuto( false );
+    fbo.begin();
     
+    if(noBG && ofGetFrameNum()>10){
+        ofSetColor(averagedCol);
+        ofDrawRectangle(0,0, ofGetWidth()*2, ofGetHeight()*2);
+        noBG = false;
+    }
     
-//    float angle = 180 - RAD_TO_DEG * atan2( ofxAccelerometer.getForce().y, ofxAccelerometer.getForce().x );
+//    ofSetBackgroundAuto( false );
     
-    seek(ofPoint(ofGetMouseX(),ofGetMouseY()));
-    
-//    ofPushMatrix();
-//    ofRotate(90, 1,0,0);
-//    float accelx = ofxAccelerometer.getForce().x;
-//    ofPopMatrix();
+
+    seek(ofPoint(ofGetMouseX()*2,ofGetMouseY()*2));
     
     accel = ofPoint( ofxAccelerometer.getForce().x, -ofxAccelerometer.getForce().y);
     
     
-    
+
     location += 20* accel;
     
     speed = ofClamp(
@@ -90,21 +95,17 @@ void ofApp::draw() {
 
     
     ofSetColor(ofColor(averagedCol, 255));
-    ofDrawCircle(location, 25-speed*2);
+    ofDrawCircle(location, (25-speed*2)*4);
     
-    ofSetColor(ofColor(averagedCol, 15-speed));
-    ofDrawCircle(location, 10+speed*6);
-    
-    ofSetColor(ofColor(averagedCol, 1+speed/2));
-    ofDrawCircle(location, 500-speed*100);
+//    ofSetColor(ofColor(averagedCol, 15-speed));
+//    ofDrawCircle(location, (10+speed*6)*4);
+//    
+//    ofSetColor(ofColor(averagedCol, 1+speed/2));
+//    ofDrawCircle(location, (500-speed*100)*4);
 
+    fbo.end();
     
-    cout<<speed<<endl;
-    
-//    if(save){
-//        ofxiOSScreenGrab(delegate, OF_IMAGE_COLOR_ALPHA, ofGetWidth(), ofGetHeight());
-//        save = false;
-//    }
+    fbo.draw(0,0, ofGetWidth(), ofGetHeight());
 
     
 }
@@ -140,7 +141,7 @@ void ofApp::seek(ofPoint target){ //seek steering force algorithm
 
 //--------------------------------------------------------------
 void ofApp::touchDown(ofTouchEventArgs & touch){
-
+    
 }
 
 //--------------------------------------------------------------
@@ -156,29 +157,34 @@ void ofApp::touchUp(ofTouchEventArgs & touch){
 //--------------------------------------------------------------
 void ofApp::touchDoubleTap(ofTouchEventArgs & touch){
     
-    
-    ofxiOSScreenGrab(ofxiOSGetAppDelegate());
-
-//    save = true;
+//    keyboard = new ofxiOSKeyboard(2,40,320,32);
+//    keyboard->setVisible(false);
+//    keyboard->setBgColor(255, 255, 255, 255);
+//    keyboard->setFontColor(0,0,0, 255);
+//    keyboard->setFontSize(26);
 //    
-//    ofSetColor(averagedCol);
-//    ofDrawRectangle(0,0, ofGetWidth(), ofGetHeight());
+//    ofSetColor(0, 255);
+//    ofSetColor(20, 160, 240, 255);
+//    ofDrawBitmapString("Name: "+  keyboard->getText() , 2, 100);
+//    keyboard->setVisible(true);
+
     
-//    save = false;
+//    save = true;
     
-//    img.saveImage(ofxiPhoneGetDocumentsDirectory() + "test.png");
+    ofPixels pixels;
+    fbo.readToPixels(pixels);
     
-//    img.save(ofxiPhoneGetDocumentsDirectory() +  "photo.png");
+    ofSaveImage(pixels, ofxiOSGetDocumentsDirectory() + "image"+ofGetTimestampString(" %d:%m:%y %H.%M.%S") + ".png");
     
+    fbo.clear();
     
+    fbo.begin();
+
+    ofSetColor(averagedCol);
+    ofDrawRectangle(0,0, ofGetWidth()*2, ofGetHeight()*2);
     
-//    file.open(ofxiPhoneGetDocumentsDirectory() + "myfile.txt", ofFile::WriteOnly, true);
+    fbo.end();
     
-//    old example - save image to filesystem
-//    numSaved++;
-//    img.clear();
-//    img.setFromPixels(ofxiPhoneGrabScreenPix(ofxiPhoneGetAppDelegate()), ofGetWidth(), ofGetHeight(), OF_IMAGE_COLOR_ALPHA);
-//    img.saveImage(ofxiPhoneGetDocumentsDirectory()+"test"+ofToString(numSaved)+".png");
 }
 
 //--------------------------------------------------------------
